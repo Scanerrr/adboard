@@ -118,3 +118,54 @@ a.desc:after {
 .nav > li > form > button.logout:focus {
     outline: none;
 }
+
+
+table.multiple-input-list.table-renderer tr > td {width: 100%}
+.table > tfoot > tr > td {border-top: none}
+
+.ads-create textarea {
+    max-width: 100%;}
+.gallery img {max-width: 150px}
+
+.ads-create input[type="file"],
+.ads-edit input[type="file"]
+{
+    display: none;
+}
+.custom-file-upload {
+    border: 1px dotted #ccc;
+    border-radius: 5px;
+    display: inline-block;
+    padding: 42px;
+    font-size: 24px;
+    cursor: pointer;
+    margin-top: 25px;
+}
+.field-main_image {
+    margin: auto;
+}
+
+.small-img {max-width: 150px;}
+.title-bold {font-weight: 800;}
+
+.navbar-inverse .navbar-nav > li > a.add-ad-btn:hover {
+    background: #fff;
+    color: #000;
+}
+.nav-search-top {
+    background: #ccc;
+    border-bottom: 1px solid #ccc;
+}
+.search-top {
+    margin-top: 70px;
+}
+.search-top input {border-radius: 0}
+.search-top input, .search-top button {
+    border-color: #000;}
+
+.c-ad-image img {
+    width: 175px;
+    height: 175px;
+    max-width: 100%;
+}
+

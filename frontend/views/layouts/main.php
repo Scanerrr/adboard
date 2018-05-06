@@ -3,6 +3,8 @@
 /* @var $this \yii\web\View */
 /* @var $content string */
 
+use common\models\AdsSearch;
+use yii\bootstrap\ActiveForm;
 use yii\helpers\Html;
 use yii\bootstrap\Nav;
 use yii\bootstrap\NavBar;
@@ -35,32 +37,57 @@ AppAsset::register($this);
             'class' => 'navbar-inverse navbar-fixed-top',
         ],
     ]);
-    $menuItems = [
-        ['label' => 'Home', 'url' => ['/site/index']],
-        ['label' => 'About', 'url' => ['/site/about']],
-        ['label' => 'Contact', 'url' => ['/site/contact']],
-    ];
+    $menuItems = [];
     if (Yii::$app->user->isGuest) {
-        $menuItems[] = ['label' => 'Signup', 'url' => ['/site/signup']];
-        $menuItems[] = ['label' => 'Login', 'url' => ['/site/login']];
+        $menuItems[] = ['label' => 'Регистарция', 'url' => ['/site/signup']];
+        $menuItems[] = ['label' => 'Вход', 'url' => ['/site/login']];
     } else {
-        $menuItems[] = '<li>'
+        $menuItems[] = ['label' => 'Мой профиль', 'items' => [
+            '<li class="dropdown-header">' . Yii::$app->user->identity->username . '</li>',
+            '<li class="divider"></li>',
+            ['label' => 'Объявления', 'url' => ['/ads/index']],
+            ['label' => 'Настройки', 'url' => ['/site/profile']],
+            '<li class="divider"></li>',
+            '<li>'
             . Html::beginForm(['/site/logout'], 'post')
             . Html::submitButton(
-                'Logout (' . Yii::$app->user->identity->username . ')',
+                'Выйти',
                 ['class' => 'btn btn-link logout']
             )
             . Html::endForm()
-            . '</li>';
+            . '</li>',
+        ]];
+
+        $menuItems[] = ['label' => 'Подать объявление', 'url' => ['/ads/create'], 'linkOptions'=>['class' => 'btn btn-default add-ad-btn']];
+
     }
     echo Nav::widget([
         'options' => ['class' => 'navbar-nav navbar-right'],
         'items' => $menuItems,
     ]);
     NavBar::end();
+
     ?>
 
+    <nav class="nav-search-top">
+        <div class="container">
+            <div class="search-top">
+                <?php $form = ActiveForm::begin(['action' => '/site/search']); ?>
+                <div class="row">
+                    <div class="col-sm-3">
+                        <?= $form->field(new AdsSearch(), 'q')->textInput(['placeholder' => 'Поиск...'])->label(false); ?>
+                    </div>
+                    <div class="col-sm-3">
+                        <!--                    --><?//= $form->field(new AdsSearch(), 'q')->textInput(['placeholder' => 'Вся Украина'])->label(false); ?>
+                    </div>
+                    <?= Html::submitButton('Поиск', ['class' => 'btn btn-default']) ?>
+                </div>
+                <?php ActiveForm::end(); ?>
+            </div>
+        </div>
+    </nav>
     <div class="container">
+
         <?= Breadcrumbs::widget([
             'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
         ]) ?>
@@ -78,6 +105,8 @@ AppAsset::register($this);
 </footer>
 
 <?php $this->endBody() ?>
+
+<?php $this->registerJsFile('/js/main.js',  ['position' => yii\web\View::POS_END]); ?>
 </body>
 </html>
 <?php $this->endPage() ?>
