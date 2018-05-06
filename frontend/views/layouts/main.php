@@ -44,6 +44,9 @@ AppAsset::register($this);
         $menuItems[] = ['label' => 'Signup', 'url' => ['/site/signup']];
         $menuItems[] = ['label' => 'Login', 'url' => ['/site/login']];
     } else {
+        $menuItems[] = ['label' => 'Мой профиль', 'url' => ['/site/profile']];
+        $menuItems[] = ['label' => 'Подать объявление', 'url' => ['/ads/create']];
+
         $menuItems[] = '<li>'
             . Html::beginForm(['/site/logout'], 'post')
             . Html::submitButton(
@@ -78,6 +81,8 @@ AppAsset::register($this);
 </footer>
 
 <?php $this->endBody() ?>
+
+<?php $this->registerJsFile('/js/main.js',  ['position' => yii\web\View::POS_END]); ?>
 </body>
 </html>
 <?php $this->endPage() ?>

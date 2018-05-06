@@ -1,8 +1,13 @@
 <?php
 namespace frontend\controllers;
 
+use common\models\City;
+use common\models\User;
+use common\models\UserPhones;
 use Yii;
 use yii\base\InvalidParamException;
+use yii\helpers\ArrayHelper;
+use yii\helpers\VarDumper;
 use yii\web\BadRequestHttpException;
 use yii\web\Controller;
 use yii\filters\VerbFilter;
@@ -26,7 +31,7 @@ class SiteController extends Controller
         return [
             'access' => [
                 'class' => AccessControl::className(),
-                'only' => ['logout', 'signup'],
+                'only' => ['logout', 'signup', 'edit'],
                 'rules' => [
                     [
                         'actions' => ['signup'],
@@ -35,6 +40,11 @@ class SiteController extends Controller
                     ],
                     [
                         'actions' => ['logout'],
+                        'allow' => true,
+                        'roles' => ['@'],
+                    ],
+                    [
+                        'actions' => ['edit'],
                         'allow' => true,
                         'roles' => ['@'],
                     ],
@@ -212,4 +222,52 @@ class SiteController extends Controller
             'model' => $model,
         ]);
     }
+
+    /**
+     * edit profile page
+     * @return string
+     */
+    public function actionProfile()
+    {
+        if (Yii::$app->user->isGuest) return  $this->redirect('/site/login');
+
+        $user = User::findIdentity(Yii::$app->user->identity);
+
+        $cities = City::find(['status' => '1'])->select(['id', 'name_ru'])->all();
+
+        $phones = $user->getUserPhones()->all();
+        return $this->render('profile', [
+            'user' => $user,
+            'cities' => ArrayHelper::map($cities, 'id', 'name_ru'),
+            'phones' => ArrayHelper::map($phones, 'id', 'telephones'),
+            'userPhones' => new UserPhones(),
+        ]);
+    }
+
+    public function actionEdit()
+    {
+        $userId = Yii::$app->user->id;
+        $user = User::findOne($userId);
+
+
+        if ($user->load(Yii::$app->request->post()) && $user->validate() && $user->save()) {
+
+            if (isset(Yii::$app->request->post('UserPhones')['telephones'])) {
+                foreach (Yii::$app->request->post('UserPhones')['telephones'] as $telephone) {
+                    $userPhone = new UserPhones();
+                    $userPhone->user_id = $userId;
+                    $userPhone->telephones = $telephone;
+                    $userPhone->save();
+                }
+            }
+//            TODO: CREATE multiple phones
+
+            Yii::$app->session->setFlash('success', 'da.');
+
+            return $this->redirect('/site/profile');
+        }
+
+        return $this->redirect('/site/profile');
+    }
+
 }

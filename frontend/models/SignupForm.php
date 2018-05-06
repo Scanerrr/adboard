@@ -12,6 +12,8 @@ class SignupForm extends Model
     public $username;
     public $email;
     public $password;
+    public $firstname;
+    public $lastname;
 
 
     /**
@@ -33,6 +35,17 @@ class SignupForm extends Model
 
             ['password', 'required'],
             ['password', 'string', 'min' => 6],
+
+            ['firstname', 'trim'],
+            ['firstname', 'string', 'min' => 2, 'max' => 255],
+
+            ['lastname', 'trim'],
+            ['lastname', 'string', 'min' => 2, 'max' => 255],
+
+            ['telephone', 'trim'],
+            ['telephone', 'number', 'min' => 10, 'max' => 15],
+            ['telephone', 'unique', 'targetClass' => '\common\models\User', 'message' => 'This telephone address has already been taken.'],
+
         ];
     }
 
@@ -50,6 +63,8 @@ class SignupForm extends Model
         $user = new User();
         $user->username = $this->username;
         $user->email = $this->email;
+        $user->firstname = $this->firstname;
+        $user->lastname = $this->lastname;
         $user->setPassword($this->password);
         $user->generateAuthKey();
         

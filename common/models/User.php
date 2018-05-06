@@ -8,24 +8,38 @@ use yii\db\ActiveRecord;
 use yii\web\IdentityInterface;
 
 /**
- * User model
+ * This is the model class for table "user".
  *
- * @property integer $id
+ * @property int $id
  * @property string $username
+ * @property string $auth_key
  * @property string $password_hash
  * @property string $password_reset_token
  * @property string $email
- * @property string $auth_key
- * @property integer $status
- * @property integer $created_at
- * @property integer $updated_at
- * @property string $password write-only password
+ * @property string $firstname
+ * @property string $lastname
+ * @property int $role
+ * @property int $city_id
+ * @property int $status
+ * @property int $created_at
+ * @property int $updated_at
+ *
+ * @property City $city
+ * @property Roles $role0
+ * @property UserAdWatches[] $userAdWatches
+ * @property UserPhones[] $userPhones
  */
 class User extends ActiveRecord implements IdentityInterface
 {
     const STATUS_DELETED = 0;
     const STATUS_ACTIVE = 10;
 
+    /**
+     * @Roles
+     */
+    const ROLE_ADMIN = 1;
+    const ROLE_MODERATOR = 2;
+    const ROLE_USER = 3;
 
     /**
      * {@inheritdoc}
@@ -53,6 +67,50 @@ class User extends ActiveRecord implements IdentityInterface
         return [
             ['status', 'default', 'value' => self::STATUS_ACTIVE],
             ['status', 'in', 'range' => [self::STATUS_ACTIVE, self::STATUS_DELETED]],
+            ['role', 'default', 'value' => self::ROLE_USER],
+            ['role', 'in', 'range' => [self::ROLE_ADMIN, self::ROLE_USER]],
+
+            ['email', 'trim'],
+            ['email', 'required'],
+            ['email', 'email'],
+            ['email', 'string', 'max' => 255],
+            ['email', 'unique', 'targetClass' => '\common\models\User', 'message' => 'This email address has already been taken.'],
+
+            ['firstname', 'trim'],
+            ['firstname', 'string', 'min' => 2, 'max' => 255],
+
+            ['lastname', 'trim'],
+            ['lastname', 'string', 'min' => 2, 'max' => 255],
+
+
+            ['city_id', 'trim'],
+            [['password_reset_token'], 'unique'],
+            [['city_id'], 'exist', 'skipOnError' => true, 'targetClass' => City::className(), 'targetAttribute' => ['city_id' => 'id']],
+            [['role'], 'exist', 'skipOnError' => true, 'targetClass' => Roles::className(), 'targetAttribute' => ['role' => 'id']],
+            [['role', 'city_id', 'status', 'created_at', 'updated_at'], 'integer'],
+
+        ];
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function attributeLabels()
+    {
+        return [
+            'id' => 'ID',
+            'username' => 'Username',
+            'auth_key' => 'Auth Key',
+            'password_hash' => 'Password Hash',
+            'password_reset_token' => 'Password Reset Token',
+            'email' => 'Email',
+            'firstname' => 'Firstname',
+            'lastname' => 'Lastname',
+            'role' => 'Role',
+            'city_id' => 'City ID',
+            'status' => 'Status',
+            'created_at' => 'Created At',
+            'updated_at' => 'Updated At',
         ];
     }
 
@@ -186,4 +244,34 @@ class User extends ActiveRecord implements IdentityInterface
     {
         $this->password_reset_token = null;
     }
+
+    public function geCity()
+    {
+        return $this->hasOne(City::className(), ['id' => 'city_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getRole()
+    {
+        return $this->hasOne(Roles::className(), ['id' => 'role']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getUserAdWatches()
+    {
+        return $this->hasMany(UserAdWatches::className(), ['user_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getUserPhones()
+    {
+        return $this->hasMany(UserPhones::className(), ['user_id' => 'id']);
+    }
+
 }
