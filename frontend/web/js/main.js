@@ -29,4 +29,8 @@ $(document).ready(function() {
     $('.add_image').on('click', function() {
         $('.sub_images').fadeIn();
     });
+
+    $('.search').bind('typeahead:select', function(ev, suggestion) {
+        $('#search-top').submit();
+    });
 });

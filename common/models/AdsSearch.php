@@ -13,11 +13,12 @@ use yii\base\Model;
 
 class AdsSearch extends Model
 {
-    public $q;
+    public $ad;
+    public $region;
     public function rules()
     {
         return [
-            ['q', 'string']
+            [['ad', ['region']], 'string']
         ];
     }
 

@@ -4,10 +4,12 @@
 /* @var $content string */
 
 use common\models\AdsSearch;
+use kartik\typeahead\Typeahead;
 use yii\bootstrap\ActiveForm;
 use yii\helpers\Html;
 use yii\bootstrap\Nav;
 use yii\bootstrap\NavBar;
+use yii\helpers\Url;
 use yii\widgets\Breadcrumbs;
 use frontend\assets\AppAsset;
 use common\widgets\Alert;
@@ -72,13 +74,61 @@ AppAsset::register($this);
     <nav class="nav-search-top">
         <div class="container">
             <div class="search-top">
-                <?php $form = ActiveForm::begin(['action' => '/site/search']); ?>
+                <?php $form = ActiveForm::begin(['id' => 'search-top', 'action' => '/site/search']); ?>
                 <div class="row">
                     <div class="col-sm-3">
-                        <?= $form->field(new AdsSearch(), 'q')->textInput(['placeholder' => 'Поиск...'])->label(false); ?>
+                        <?= Typeahead::widget([
+                            'name' => 'ad',
+                            'options' => ['placeholder' => 'Поиск...', 'class' => 'search'],
+                            'pluginOptions' => [
+                                'minLength' => 2,
+                                'highlight' => true
+                            ],
+                            'dataset' => [
+                                [
+                                    'templates' => [
+                                        'notFound' =>
+                                            '<div class="tt-suggestion tt-selectable">Не найдено</div>'
+                                    ],
+                                    'datumTokenizer' => "Bloodhound.tokenizers.obj.whitespace('name')",
+                                    'display' => 'name',
+//                                    'prefetch' => Url::to(['site/region-list']),
+                                    'remote' => [
+                                        'url' => Url::to(['site/ad-list']) . '?q=%QUERY',
+                                        'wildcard' => '%QUERY'
+                                    ]
+                                ]
+                            ]
+                        ]); ?>
+<!--                        --><?//= Html::input('text', 'ad', '', [
+//                                'class' => 'form-control', 'placeholder' =>'Поиск...']) ?>
                     </div>
                     <div class="col-sm-3">
-                        <!--                    --><?//= $form->field(new AdsSearch(), 'q')->textInput(['placeholder' => 'Вся Украина'])->label(false); ?>
+                        <?= Typeahead::widget([
+                            'name' => 'place',
+                            'id' => 'search_place',
+                            'options' => ['placeholder' => 'Вся Украина', 'class' => 'search'],
+                            'pluginOptions' => [
+                                'minLength' => 2,
+                                'highlight' => true
+                            ],
+                            'dataset' => [
+                                [
+                                    'templates' => [
+                                            'notFound' =>
+                                                '<div class="tt-suggestion tt-selectable">Не найдено</div>'
+                                    ],
+                                    'datumTokenizer' => "Bloodhound.tokenizers.obj.whitespace('name')",
+                                    'display' => 'name',
+                                    'prefetch' => Url::to(['site/region-list']),
+//                                    'prefetch' => $baseUrl . '/samples/countries.json',
+                                    'remote' => [
+                                        'url' => Url::to(['site/place-list']) . '?q=%QUERY',
+                                        'wildcard' => '%QUERY'
+                                    ]
+                                ]
+                            ]
+                        ]); ?>
                     </div>
                     <?= Html::submitButton('Поиск', ['class' => 'btn btn-default']) ?>
                 </div>

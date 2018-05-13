@@ -5,6 +5,7 @@ namespace common\models;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\db\ActiveRecord;
+use yii\helpers\ArrayHelper;
 use yii\helpers\FileHelper;
 use yii\helpers\HtmlPurifier;
 use yii\web\UploadedFile;
@@ -199,6 +200,39 @@ class Ads extends ActiveRecord
         } catch (\Exception $e) {
 
         }
+    }
+
+
+    /**
+     * get Ads by place name (region or city name)
+     *
+     * @param null $query
+     * @return $this|array|bool
+     */
+    static function getAdsByPlace($query = null)
+    {
+        if (!$query) return false;
+        // check if the place in regions table
+        if (!$region = Region::findOne(['name_ru' => $query])) {
+            $city = City::findOne(['name_ru' => $query]);
+            return Ads::find()->where(['city_id' => $city->id]);
+        }
+        return self::getAdsByRegionId($region->id);
+    }
+
+    /**
+     * get array of Ads object
+     *
+     * @param null $id
+     * @return $this|bool
+     */
+    public static function getAdsByRegionId($id = null)
+    {
+        if (!$id) return false;
+        $cities = City::find()->select('id')->where(['region_id' => $id])->asArray()->all();
+        $cityIds = ArrayHelper::getColumn($cities, 'id');
+
+        return Ads::find()->where(['city_id' => $cityIds]);
     }
 
 }

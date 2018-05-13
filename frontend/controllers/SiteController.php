@@ -4,13 +4,16 @@ namespace frontend\controllers;
 use common\models\Ads;
 use common\models\AdsSearch;
 use common\models\City;
+use common\models\Region;
 use common\models\User;
 use common\models\UserPhones;
 use Yii;
 use yii\base\InvalidParamException;
 use yii\data\ActiveDataProvider;
+use yii\db\Query;
 use yii\helpers\ArrayHelper;
 use yii\helpers\Html;
+use yii\helpers\Json;
 use yii\web\BadRequestHttpException;
 use yii\web\Controller;
 use yii\filters\VerbFilter;
@@ -19,6 +22,7 @@ use common\models\LoginForm;
 use frontend\models\PasswordResetRequestForm;
 use frontend\models\ResetPasswordForm;
 use frontend\models\SignupForm;
+use yii\web\HttpException;
 
 /**
  * Site controller
@@ -77,15 +81,15 @@ class SiteController extends Controller
         ];
     }
 
-    public function beforeAction($action)
-    {
-        $searchModel = new AdsSearch();
-        if ($searchModel->load(Yii::$app->request->post()) && $searchModel->validate()) {
-           $q = Html::encode($searchModel->q);
-           return $this->redirect(Yii::$app->urlManager->createUrl(['site/search', 'q' => $q]));
-        }
-        return true;
-    }
+//    public function beforeAction($action)
+//    {
+//        $searchModel = new AdsSearch();
+//        if ($searchModel->load(Yii::$app->request->post()) && $searchModel->validate()) {
+//           $ad = Html::encode($searchModel->ad);
+//           return $this->redirect(Yii::$app->urlManager->createUrl(['site/search', 'ad' => $ad]));
+//        }
+//        return true;
+//    }
 
 
     /**
@@ -265,20 +269,68 @@ class SiteController extends Controller
 
     public function actionSearch()
     {
-        $q = Yii::$app->request->get('q');
-        $adsQuery = Ads::find()->filterWhere(['or', ['like', 'title', $q], ['like', 'description', $q]]);
-        $ads = $adsQuery->all();
-        $dp = new ActiveDataProvider([
-        'query' => $adsQuery,
-        'pagination' => [
-            'pageSize' => 20,
-        ],
-    ]);
+        if (Yii::$app->request->isPost) {
+            // search by place (region or city name)
+            $place = Yii::$app->request->post('place');
+            $ad = Yii::$app->request->post('ad');
+            $q = null;
+            if ($place) { $q = $place; $adsQuery = Ads::getAdsByPlace($place); }
+            if ($ad) { $q = $ad; $adsQuery = Ads::find()->filterWhere(['or', ['like', 'title', $ad], ['like', 'description', $ad]]); }
 
-        return $this->render('search', [
-            'ads' => $ads,
-            'query' => $q,
-            'dp' => $dp
-        ]);
+            if (!$q) return $this->redirect(['ads/all']);
+                $dp = new ActiveDataProvider([
+                    'query' => $adsQuery,
+                    'pagination' => [
+                        'pageSize' => 20,
+                    ],
+                ]);
+
+                return $this->render('search', [
+//                    'ads' => $ads,
+                    'query' => $q,
+                    'dp' => $dp
+                ]);
+
+        }
+    }
+
+    /**
+     * Your controller action to fetch the list
+     */
+    public function actionPlaceList($q = null) {
+        if (!Yii::$app->request->isAjax) throw new HttpException(404 ,'Страница не найдена');
+        Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        $q = trim($q);
+        if (!$q) return [];
+        $regions = Region::find()->select('name_ru as name')
+            ->where('name_ru LIKE "%' . $q .'%"')
+            ->orderBy('name_ru')->asArray()->all();
+        $cities = City::find()->select('name_ru as name')
+            ->where('name_ru LIKE "%' . $q .'%"')
+            ->orderBy('name_ru')->asArray()->all();
+        $out = ArrayHelper::merge($regions, $cities);
+        ArrayHelper::multisort($out, ['name'], [SORT_ASC]);
+        return $out;
+    }
+
+    public function actionRegionList()
+    {
+        if (!Yii::$app->request->isAjax) throw new HttpException(404 ,'Страница не найдена');
+        Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        return Region::find()->select('name_ru as name')->orderBy('name_ru')->asArray()->all();
+    }
+
+    /**
+     * Your controller action to fetch the list
+     */
+    public function actionAdList($q = null) {
+        if (!Yii::$app->request->isAjax) throw new HttpException(404 ,'Страница не найдена');
+        Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        $q = trim($q);
+        if (!$q) return [];
+        $out = Ads::find()->select('title as name')
+            ->where('title LIKE  "%' . $q .'%"')
+            ->orderBy('title')->asArray()->all();
+        return $out;
     }
 }

@@ -43,7 +43,7 @@ class Categories extends \yii\db\ActiveRecord
     {
         return [
             'id' => 'ID',
-            'name' => 'Name',
+            'name' => 'Название',
             'parent_id' => 'Parent ID',
         ];
     }
