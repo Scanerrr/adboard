@@ -16,6 +16,7 @@ $this->title = 'Мои объявления';
                 'dataProvider' => $dp,
                 'itemView' => '_view',
                 'summary'=>'',
+                'emptyText' => 'Сейчас у вас нет объявлений',
             ]) ?>
         </div>
     </div>

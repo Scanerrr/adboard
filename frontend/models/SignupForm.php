@@ -21,11 +21,6 @@ class SignupForm extends Model
     public function rules()
     {
         return [
-            ['username', 'trim'],
-            ['username', 'required'],
-            ['username', 'unique', 'targetClass' => '\common\models\User', 'message' => '{attribute} уже используется.'],
-            ['username', 'string', 'min' => 2, 'max' => 255],
-
             ['email', 'trim'],
             ['email', 'required'],
             ['email', 'email'],
@@ -44,7 +39,6 @@ class SignupForm extends Model
     {
         return [
             'id' => 'ID',
-            'username' => 'Никнейм',
             'email' => 'Email',
             'password' => 'Пароль',
         ];
@@ -62,7 +56,6 @@ class SignupForm extends Model
         }
         
         $user = new User();
-        $user->username = $this->username;
         $user->email = $this->email;
         $user->role = $user::ROLE_USER;
         $user->setPassword($this->password);

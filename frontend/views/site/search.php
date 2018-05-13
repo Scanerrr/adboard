@@ -20,6 +20,7 @@ $this->title = 'Результат поиска - ' . $query;
                 'dataProvider' => $dp,
                 'itemView' => '_searchList',
                 'summary'=>'',
+                'emptyText' => 'По вашему запросу ничего не найдено',
             ]) ?>
         </div>
     </div>

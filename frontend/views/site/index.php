@@ -22,6 +22,7 @@ $this->title = 'Главная';
                     'dataProvider' => $dp,
                     'itemView' => '_main_grid',
                     'summary'=>'',
+                    'emptyText' => 'Список объявлений пуст',
                 ]) ?>
             </div>
         </div>

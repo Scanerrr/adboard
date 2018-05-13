@@ -43,7 +43,7 @@ AppAsset::register($this);
         $menuItems[] = ['label' => 'Вход', 'url' => ['/site/login']];
     } else {
         $menuItems[] = ['label' => 'Мой профиль', 'items' => [
-            '<li class="dropdown-header">' . Yii::$app->user->identity->username . '</li>',
+            '<li class="dropdown-header">' . Yii::$app->user->identity->email . '</li>',
             '<li class="divider"></li>',
             ['label' => 'Объявления', 'url' => ['/ads/index']],
             ['label' => 'Настройки', 'url' => ['/site/profile']],
