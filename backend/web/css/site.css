@@ -118,3 +118,13 @@ a.desc:after {
 .nav > li > form > button.logout:focus {
     outline: none;
 }
+.navbar-inverse .navbar-brand {
+    color: #fff;
+}
+.navbar-brand > img {
+
+}
+.navbar-description {
+    display: block;
+    color: #ccc;
+}

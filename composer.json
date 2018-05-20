@@ -23,7 +23,8 @@
         "kartik-v/yii2-widget-fileinput": "@dev",
         "rmrevin/yii2-fontawesome": "~3.0",
         "kartik-v/yii2-widget-depdrop": "@dev",
-        "kartik-v/yii2-widget-typeahead": "*"
+        "kartik-v/yii2-widget-typeahead": "*",
+        "pheme/yii2-settings": "*"
     },
     "require-dev": {
         "yiisoft/yii2-debug": "~2.0.0",

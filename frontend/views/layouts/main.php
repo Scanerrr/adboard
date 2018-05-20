@@ -100,12 +100,12 @@ AppAsset::register($this);
                                 ]
                             ]
                         ]); ?>
-<!--                        --><?//= Html::input('text', 'ad', '', [
-//                                'class' => 'form-control', 'placeholder' =>'Поиск...']) ?>
+
                     </div>
                     <div class="col-sm-3">
                         <?= Typeahead::widget([
                             'name' => 'place',
+//                            'value' => '123s',
                             'id' => 'search_place',
                             'options' => ['placeholder' => 'Вся Украина', 'class' => 'search'],
                             'pluginOptions' => [

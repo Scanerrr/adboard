@@ -22,7 +22,7 @@ class SiteController extends Controller
                 'class' => AccessControl::className(),
                 'rules' => [
                     [
-                        'actions' => ['login', 'error'],
+                        'actions' => ['login', 'error', 'settings'],
                         'allow' => true,
                     ],
                     [
@@ -41,6 +41,12 @@ class SiteController extends Controller
         ];
     }
 
+    public function beforeAction($action)
+    {
+        Yii::$app->getModule('settings')->init(); // make sure this module is init first
+        return parent::beforeAction($action);
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -49,6 +55,12 @@ class SiteController extends Controller
         return [
             'error' => [
                 'class' => 'yii\web\ErrorAction',
+            ],
+            'settings' => [
+                'class' => 'pheme\settings\SettingsAction',
+                'modelClass' => 'common\models\Site',
+                //'scenario' => 'site',	// Change if you want to re-use the model for multiple setting form.
+                'viewName' => 'settings'	// The form we need to render
             ],
         ];
     }
@@ -75,7 +87,7 @@ class SiteController extends Controller
         }
 
         $model = new LoginForm();
-        if ($model->load(Yii::$app->request->post()) && $model->login()) {
+        if ($model->load(Yii::$app->request->post()) && $model->login(true)) {
             return $this->goBack();
         } else {
             $model->password = '';

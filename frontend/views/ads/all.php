@@ -19,7 +19,7 @@ $this->title = 'Все объявления';
                 'dataProvider' => $dp,
                 'itemView' => '_all',
                 'summary'=>'',
-                'emptyText' => 'Список объявлений пуст',
+//                'emptyText' => 'Список объявлений пуст',
             ]) ?>
         </div>
     </div>

@@ -7,11 +7,17 @@ $params = array_merge(
 );
 
 return [
+    'language' => 'ru-RU',
     'id' => 'app-backend',
     'basePath' => dirname(__DIR__),
     'controllerNamespace' => 'backend\controllers',
     'bootstrap' => ['log'],
-    'modules' => [],
+    'modules' => [
+        'settings' => [
+            'class' => 'pheme\settings\Module',
+            'sourceLanguage' => 'ru'
+        ],
+    ],
     'components' => [
         'request' => [
             'csrfParam' => '_csrf-backend',
@@ -37,14 +43,25 @@ return [
         'errorHandler' => [
             'errorAction' => 'site/error',
         ],
-        /*
+
         'urlManager' => [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
             'rules' => [
             ],
         ],
-        */
+        'urlManagerFrontend' => [
+            'class' => 'yii\web\UrlManager',
+            'baseUrl' => '',
+            'hostInfo' => 'http://adboard-front/',
+            'enablePrettyUrl' => true,
+            'enableStrictParsing' => true,
+            'showScriptName' => false,
+        ],
+        'settings' => [
+            'class' => 'pheme\settings\components\Settings'
+        ],
+
     ],
     'params' => $params,
 ];

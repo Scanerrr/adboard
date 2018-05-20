@@ -3,6 +3,7 @@ namespace common\models;
 
 use Yii;
 use yii\base\Model;
+use yii\web\Session;
 
 /**
  * Login form
@@ -67,10 +68,28 @@ class LoginForm extends Model
      *
      * @return bool whether the user is logged in successfully
      */
-    public function login()
+    public function login($backend = false)
     {
         if ($this->validate()) {
-            return Yii::$app->user->login($this->getUser(), $this->rememberMe ? 3600 * 24 * 30 : 0);
+
+            $user = $this->getUser();
+            if ($user) {
+                $session = new Session();
+                $session->open();
+                $session['role'] = $user->role;
+                if ($backend) {
+                    if ($this->_user->role != User::ROLE_USER) {
+                        return Yii::$app->user->login($this->_user, $this->rememberMe ? 3600 * 24 * 30 : 0);
+                    } else {
+                        Yii::$app->session->setFlash('error', 'У данного пользователя не прав доступа. <br> Обратитесь к администратору.');
+                        return false;
+                    }
+                } else {
+                    return Yii::$app->user->login($this->_user, $this->rememberMe ? 3600 * 24 * 30 : 0);
+                }
+            } else {
+                return false;
+            }
         }
         
         return false;
