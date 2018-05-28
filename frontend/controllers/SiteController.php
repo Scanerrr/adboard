@@ -3,6 +3,7 @@ namespace frontend\controllers;
 
 use common\models\Ads;
 use common\models\AdsSearch;
+use common\models\Categories;
 use common\models\City;
 use common\models\Region;
 use common\models\User;
@@ -92,6 +93,9 @@ class SiteController extends Controller
 //    }
 
 
+// TODO: slug implementation
+// TODO: search by slug
+
     /**
      * Displays homepage.
      *
@@ -104,9 +108,30 @@ class SiteController extends Controller
             'pagination' => false,
             'sort' => ['defaultOrder' => ['updated_at'=>SORT_DESC]]
         ]);
+        echo "<pre>";
+        var_dump(Categories::find()->all());
+        echo "</pre>"; die();
+//        get main cats
+        $categories = Categories::getCategories(0);
+
         return $this->render('index', [
-            'dp' => $dp
+            'dp' => $dp,
+            'categories' => $categories
         ]);
+    }
+
+    public function actionGetSubcategories()
+    {
+        if (!Yii::$app->request->isAjax) throw new HttpException(404 ,'Страница не найдена');
+        Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        if ($id = Yii::$app->request->post('id')) {
+
+            return [
+                'success' => true,
+                'categories' => Categories::getCategories((int)$id)
+            ];
+        }
+        return ['error' => true, 'message' => 'Не верный идентификатор категории'];
     }
 
     /**

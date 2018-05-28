@@ -6,6 +6,7 @@
 use common\models\AdsSearch;
 use kartik\typeahead\Typeahead;
 use yii\bootstrap\ActiveForm;
+use yii\bootstrap\Modal;
 use yii\helpers\Html;
 use yii\bootstrap\Nav;
 use yii\bootstrap\NavBar;
@@ -30,7 +31,7 @@ AppAsset::register($this);
 <body>
 <?php $this->beginBody() ?>
 
-<div class="wrap">
+<header>
     <?php
     NavBar::begin([
         'brandLabel' => Yii::$app->name,
@@ -136,14 +137,16 @@ AppAsset::register($this);
             </div>
         </div>
     </nav>
-    <div class="container">
 
-        <?= Breadcrumbs::widget([
-            'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
-        ]) ?>
-        <?= Alert::widget() ?>
-        <?= $content ?>
-    </div>
+</header>
+
+<div class="container">
+
+    <?= Breadcrumbs::widget([
+        'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
+    ]) ?>
+    <?= Alert::widget() ?>
+    <?= $content ?>
 </div>
 
 <footer class="footer">
@@ -153,6 +156,18 @@ AppAsset::register($this);
         <p class="pull-right"><?= Yii::powered() ?></p>
     </div>
 </footer>
+
+<?php
+Modal::begin([
+    'header'=>'<h4 class="text-center">Выбор категории</h4>',
+    'id'=>'modal-subcategories',
+    'size'=>'modal-lg',
+]); ?>
+<div id="modal-subcategories-content">
+    <div id="modal-main-category" class="modal-main-category-div"><a href=""></a></div>
+    <ul id="second-level-categories" class="sub-categories-list"></ul>
+</div>
+<?php Modal::end(); ?>
 
 <?php $this->endBody() ?>
 

@@ -169,3 +169,27 @@ table.multiple-input-list.table-renderer tr > td {width: 100%}
     max-width: 100%;
 }
 
+.sub-categories-list {
+    columns: 3;
+    list-style-type: none;
+}
+.modal-main-category-div {
+    margin-bottom: 15px;
+}
+.modal-main-category-div a {
+    font-size: 115%;
+}
+
+.main-category {
+    margin: 10px 0;
+}
+
+.main-subcategory-caption {
+    font-weight: 700;
+    text-transform: uppercase;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    line-height: 16px;
+    color: #222;
+}

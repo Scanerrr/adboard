@@ -33,4 +33,30 @@ $(document).ready(function() {
     $('.search').bind('typeahead:select', function(ev, suggestion) {
         $('#search-top').submit();
     });
+
+    $('.get-subcategories').on('click', function () {
+        var $this = $(this);
+        var category_id = $this.data('category_id');
+        var slug = $this.data('category_slug');
+        $.ajax({
+            url: '/site/get-subcategories',
+            method: 'POST',
+            data: { id: category_id },
+            dataType: 'JSON',
+            success: function (data) {
+                if (data.error) {
+                    alert(data.message);
+                }
+                if (data.success) {
+                    var modal = $('#modal-subcategories');
+                    $('#modal-main-category > a').attr('href', '/site/' + slug).text('Смотреть все объявления в ' + $this.text());
+                    $.each(data.categories, function (i, cat) {
+                        modal.find('#second-level-categories').append('<li><a href="/site/' + slug + '/' + cat.slug +'">'+ cat.name +'</a></li>')
+                    });
+                    modal.modal();
+                }
+            }
+        });
+
+    });
 });

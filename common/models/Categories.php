@@ -3,6 +3,7 @@
 namespace common\models;
 
 use Yii;
+use yii\behaviors\SluggableBehavior;
 
 /**
  * This is the model class for table "categories".
@@ -36,6 +37,16 @@ class Categories extends \yii\db\ActiveRecord
         ];
     }
 
+    public function behaviors()
+    {
+        return [
+            [
+                'class' => SluggableBehavior::className(),
+                'attribute' => 'name',
+            ]
+        ];
+    }
+
     /**
      * @inheritdoc
      */
@@ -54,5 +65,11 @@ class Categories extends \yii\db\ActiveRecord
     public function getAds()
     {
         return $this->hasMany(Ads::className(), ['category_id' => 'id']);
+    }
+
+    public static function getCategories($parent_id = 0)
+    {
+       return Categories::find()->select(['id', 'name', 'slug'])
+           ->where(['parent_id' => $parent_id])->asArray()->all();
     }
 }

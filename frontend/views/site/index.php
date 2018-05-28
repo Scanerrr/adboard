@@ -8,6 +8,26 @@ use yii\helpers\Url;
 $this->title = 'Главная';
 ?>
 
+<div class="top-categories">
+    <div class="container">
+        <div class="row">
+            <div class="main-categories">
+                <?php foreach ($categories as $category): ?>
+                    <div class="col-sm-3">
+                        <div class="main-category">
+                            <?= Html::a($category['name'], '#', [
+                                    'class' => 'get-subcategories main-subcategory-caption',
+                                    'data-category_id' => $category['id'],
+                                    'data-category_slug' => $category['slug']
+                                ]) ?>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="site-index">
 
     <div class="container">
