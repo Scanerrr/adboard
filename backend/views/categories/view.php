@@ -4,12 +4,12 @@ use yii\helpers\Html;
 use yii\widgets\DetailView;
 
 /* @var $this yii\web\View */
-/* @var $model common\models\Ads */
+/* @var $model common\models\Categories */
 
-$this->title = $model->title;
+$this->title = $model->name;
 
 ?>
-<div class="ads-view">
+<div class="categories-view">
 
     <h1><?= Html::encode($this->title) ?></h1>
 
@@ -28,17 +28,10 @@ $this->title = $model->title;
         'model' => $model,
         'attributes' => [
             'id',
-            'title',
-            'category_id',
-            'city_id',
-            'user_id',
-            'price',
-            'description:ntext',
-            'phone',
+            'name',
+            'slug',
+            'parent_id',
             'image',
-            'status',
-            'updated_at',
-            'created_at',
         ],
     ]) ?>
 

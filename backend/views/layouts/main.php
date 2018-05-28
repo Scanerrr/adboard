@@ -5,10 +5,10 @@
 
 use backend\assets\AppAsset;
 use common\widgets\CustomNavBar;
+
 use yii\helpers\Html;
 use yii\bootstrap\Nav;
-use yii\bootstrap\NavBar;
-use yii\helpers\Url;
+
 use yii\widgets\Breadcrumbs;
 use common\widgets\Alert;
 AppAsset::register($this);
@@ -32,17 +32,15 @@ $settings = Yii::$app->settings;
     <?php
     CustomNavBar::begin([
         'brandLabel' => $settings->get('Site.siteName'),
-        'description' => $settings->get('Site.siteDescription'),
+
         'brandUrl' => Yii::$app->homeUrl,
         'options' => [
-            'class' => 'navbar-inverse navbar-fixed-top',
+            'class' => 'navbar-inverse',
         ],
     ]);
-    $menuItems = [
-        ['label' => 'Home', 'url' => ['/site/index']],
-    ];
+    $menuItems = [];
     if (Yii::$app->user->isGuest) {
-        $menuItems[] = ['label' => 'Login', 'url' => ['/site/login']];
+        $menuItems[] = ['label' => 'Вход', 'url' => ['/site/login']];
     } else {
         $menuItems[] = ['label' => 'Мой профиль', 'items' => [
             '<li class="dropdown-header">' . Yii::$app->user->identity->email . '</li>',
@@ -56,7 +54,7 @@ $settings = Yii::$app->settings;
             . Html::beginForm(['/site/logout'], 'post')
             . Html::submitButton(
                 'Выйти',
-                ['class' => 'btn btn-link logout']
+                ['class' => 'btn btn-link btn-block logout']
             )
             . Html::endForm()
             . '</li>',
@@ -69,24 +67,46 @@ $settings = Yii::$app->settings;
     CustomNavBar::end();
     ?>
 
-    <div class="container">
+
+
+    <div class="container-fluid">
         <?= Breadcrumbs::widget([
             'links' => isset($this->params['breadcrumbs']) ? $this->params['breadcrumbs'] : [],
         ]) ?>
         <?= Alert::widget() ?>
+        <?php if (!Yii::$app->user->isGuest): ?>
+        <div class="col-sm-3"><?php
+            $menuItems = [];
+
+            $menuItems[] = ['label' => 'Категории', 'url' => ['categories/index']];
+            $menuItems[] = ['label' => 'Объявления', 'url' => ['ads/index']];
+            $menuItems[] = ['label' => 'Настройки', 'url' => ['site/settings']];
+
+            echo Nav::widget([
+                'options' => ['class' => ''],
+                'items' => $menuItems,
+            ]); ?></div>
+        <div class="col-sm-9">
         <?= $content ?>
+        </div>
+        <?php else: ?>
+        <div class="col-sm-12">
+            <?= $content ?>
+        </div>
+        <?php endif; ?>
     </div>
 </div>
 
 <footer class="footer">
     <div class="container">
-        <p class="pull-left">&copy; <?= Html::encode(Yii::$app->name) ?> <?= date('Y') ?></p>
-
-        <p class="pull-right"><?= Yii::powered() ?></p>
+        <div class="text-center Osnovalogo">
+            Web Osnova - быстрое <a href="http://webosnova.com/development">создание сайтов</a> и <a href="http://webosnova.com/promotion">продвижение</a>
+        </div>
     </div>
 </footer>
 
 <?php $this->endBody() ?>
+
 </body>
 </html>
 <?php $this->endPage() ?>

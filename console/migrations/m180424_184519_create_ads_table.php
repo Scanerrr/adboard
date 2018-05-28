@@ -23,6 +23,7 @@ class m180424_184519_create_ads_table extends Migration
             'phone' => $this->string()->notNull(),
             'image' => $this->string(),
             'status' => $this->integer()->notNull()->defaultValue(0),
+            'count_view' => $this->integer()->notNull()->defaultValue(0),
             'updated_at' => $this->integer()->notNull(),
             'created_at' => $this->integer()->notNull(),
         ]);

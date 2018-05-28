@@ -2,7 +2,7 @@
 namespace frontend\controllers;
 
 use common\models\Ads;
-use common\models\AdsSearch;
+use common\models\Categories;
 use common\models\City;
 use common\models\Region;
 use common\models\User;
@@ -10,10 +10,7 @@ use common\models\UserPhones;
 use Yii;
 use yii\base\InvalidParamException;
 use yii\data\ActiveDataProvider;
-use yii\db\Query;
 use yii\helpers\ArrayHelper;
-use yii\helpers\Html;
-use yii\helpers\Json;
 use yii\web\BadRequestHttpException;
 use yii\web\Controller;
 use yii\filters\VerbFilter;
@@ -81,17 +78,6 @@ class SiteController extends Controller
         ];
     }
 
-//    public function beforeAction($action)
-//    {
-//        $searchModel = new AdsSearch();
-//        if ($searchModel->load(Yii::$app->request->post()) && $searchModel->validate()) {
-//           $ad = Html::encode($searchModel->ad);
-//           return $this->redirect(Yii::$app->urlManager->createUrl(['site/search', 'ad' => $ad]));
-//        }
-//        return true;
-//    }
-
-
     /**
      * Displays homepage.
      *
@@ -99,14 +85,54 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
-        $dp = new ActiveDataProvider([
-            'query' => Ads::find()->select(['id', 'title', 'price', 'image'])->where(['status' => Ads::STATUS_ACTIVE])->orderBy(['updated_at' => SORT_DESC])->limit(20),
-            'pagination' => false,
-            'sort' => ['defaultOrder' => ['updated_at'=>SORT_DESC]]
-        ]);
+
+        $ads = Ads::find()->select(['id', 'title', 'price', 'image'])
+            ->where(['status' => Ads::STATUS_ACTIVE])
+            ->orderBy(['updated_at' => SORT_DESC])->limit(20)->all();
+
+//        get main cats
+        $categories = Categories::getCategories(0);
+
         return $this->render('index', [
-            'dp' => $dp
+            'ads' => $ads,
+            'categories' => $categories
         ]);
+    }
+
+    public function actionGetSubcategories()
+    {
+        if (!Yii::$app->request->isAjax) throw new HttpException(404 ,'Страница не найдена');
+        Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        if ($id = Yii::$app->request->post('id')) {
+
+            return [
+                'success' => true,
+                'categories' => Categories::getCategories((int)$id)
+            ];
+        }
+        return ['error' => true, 'message' => 'Не верный идентификатор категории'];
+    }
+
+    public function actionGetAllCategories()
+    {
+        if (!Yii::$app->request->isAjax || !Yii::$app->request->isPost) throw new HttpException(404 ,'Страница не найдена');
+        Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+//        get array of categories
+        $categories = Categories::getCategories();
+        $cats = [];
+        foreach ($categories as $category) {
+
+            $cats[$category['id']] = [
+                'name' => $category['name'],
+                'slug' => $category['slug'],
+                'image' => $category['image'],
+                'children' => Categories::getCategories($category['id'])
+            ];
+        }
+        return [
+            'success' => true,
+            'categories' => Categories::getCategories()
+        ];
     }
 
     /**
@@ -232,8 +258,9 @@ class SiteController extends Controller
      */
     public function actionProfile()
     {
-        $user = User::findIdentity(Yii::$app->user->identity);
-        $cities = City::find(['status' => '1'])->select(['id', 'name_ru'])->all();
+        $user = User::findIdentity(Yii::$app->user->id);
+
+        $cities = City::find()->select(['id', 'name_ru'])->where(['status' => '1'])->all();
         $phones = $user->getUserPhones()->all();
         $userPhones = new UserPhones();
 
@@ -271,27 +298,53 @@ class SiteController extends Controller
     {
         if (Yii::$app->request->isPost) {
             // search by place (region or city name)
+
             $place = Yii::$app->request->post('place');
             $ad = Yii::$app->request->post('ad');
             $q = null;
-            if ($place) { $q = $place; $adsQuery = Ads::getAdsByPlace($place); }
-            if ($ad) { $q = $ad; $adsQuery = Ads::find()->filterWhere(['or', ['like', 'title', $ad], ['like', 'description', $ad]]); }
+            if ($place && $ad) {
+                $q = $place . ' и ' . $ad;
+                $adsQuery = Ads::getAdsByPlace($place)
+                    ->andWhere(['or', ['like', 'title', $ad], ['like', 'description', $ad]])
+                    ->andWhere(['status' => Ads::STATUS_ACTIVE]);
+                $this->view->params['search'] = [
+                    'ad' => $ad,
+                    'cat' => $place
+                ];
+            }
+            elseif ($place) {
+                $q = $place;
+                $adsQuery = Ads::getAdsByPlace($place)->andWhere(['status' => Ads::STATUS_ACTIVE]);
+                $this->view->params['search'] = ['cat' => $q];
+            }
+            elseif ($ad) {
+                $q = $ad;
+                $adsQuery = Ads::find()->filterWhere(['or', ['like', 'title', $ad], ['like', 'description', $ad]])->andWhere(['status' => Ads::STATUS_ACTIVE]);
+                $this->view->params['search'] = ['ad' => $q];
+            }
+            else {
+                Yii::$app->session->remove('category_name');
+                Yii::$app->session->remove('category_id');
+                Yii::$app->session->remove('category_slug');
+            }
+
+
 
             if (!$q) return $this->redirect(['ads/all']);
-                $dp = new ActiveDataProvider([
-                    'query' => $adsQuery,
-                    'pagination' => [
-                        'pageSize' => 20,
-                    ],
-                ]);
+            $dp = new ActiveDataProvider([
+                'query' => $adsQuery,
+                'pagination' => [
+                    'pageSize' => 20,
+                ],
+            ]);
 
-                return $this->render('search', [
+            return $this->render('search', [
 //                    'ads' => $ads,
-                    'query' => $q,
-                    'dp' => $dp
-                ]);
+                'query' => $q,
+                'dp' => $dp
+            ]);
 
-        }
+        } else return $this->redirect(['ads/all']);
     }
 
     /**
@@ -330,6 +383,7 @@ class SiteController extends Controller
         if (!$q) return [];
         $out = Ads::find()->select('title as name')
             ->where('title LIKE  "%' . $q .'%"')
+            ->andWhere(['status' => Ads::STATUS_ACTIVE])
             ->orderBy('title')->asArray()->all();
         return $out;
     }

@@ -43,9 +43,11 @@ return [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
             'rules' => [
+                '<controller:\w+>/<action:\w+>/<slug:[A-Za-z0-9 -_.]+>' => '<controller>/<action>',
             ],
         ],
 
     ],
+
     'params' => $params,
 ];

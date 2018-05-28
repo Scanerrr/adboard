@@ -3,6 +3,7 @@
 namespace frontend\assets;
 
 use yii\web\AssetBundle;
+use yii\web\View;
 
 /**
  * Main frontend application asset bundle.
@@ -14,11 +15,16 @@ class AppAsset extends AssetBundle
     public $css = [
         'css/site.css',
     ];
+    public $jsOptions = [
+        'position' => View::POS_END
+    ];
     public $js = [
+        'js/main.js'
     ];
     public $depends = [
         'rmrevin\yii\fontawesome\AssetBundle',
         'yii\web\YiiAsset',
         'yii\bootstrap\BootstrapAsset',
+        'yii\jui\JuiAsset',
     ];
 }

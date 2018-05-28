@@ -9,26 +9,27 @@
 namespace common\models;
 
 
-use yii\base\Model;
+use pheme\settings\models\BaseSetting;
+//use yii\base\Model;
 
-class Site extends Model
+class Site extends BaseSetting
 {
-    public $siteName, $siteDescription;
+    public $siteName, $siteDescription, $seoText;
     public function rules()
     {
         return [
-            [['siteName', 'siteDescription'], 'string'],
+            [['siteName', 'siteDescription', 'seoText'], 'string'],
         ];
     }
 
     public function fields()
     {
-        return ['siteName', 'siteDescription'];
+        return ['siteName', 'siteDescription', 'seoText'];
     }
 
     public function attributes()
     {
-        return ['siteName', 'siteDescription'];
+        return ['siteName', 'siteDescription', 'seoText'];
     }
 
     /**
@@ -39,6 +40,7 @@ class Site extends Model
         return [
             'siteName' => 'Название сайта',
             'siteDescription' => 'Описание сайта',
+            'seoText' => 'Описание на главной',
         ];
     }
 

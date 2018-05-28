@@ -7,6 +7,8 @@ use yii\widgets\ActiveForm;
 /* @var $model common\models\Site */
 /* @var $form ActiveForm */
 $this->title = 'Настройки сайта';
+
+//TODO: allow empty setting value
 ?>
 <div class="site-settings">
     <div class="row">
@@ -20,6 +22,7 @@ $this->title = 'Настройки сайта';
 
                 <?= $form->field($model, 'siteName') ?>
                 <?= $form->field($model, 'siteDescription') ?>
+                <?= $form->field($model, 'seoText')->textarea(['rows'=>7]) ?>
 
                 <div class="form-group">
                     <?= Html::submitButton('Редактировать', ['class' => 'btn btn-primary']) ?>

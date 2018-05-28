@@ -12,13 +12,9 @@ return [
     'basePath' => dirname(__DIR__),
     'controllerNamespace' => 'backend\controllers',
     'bootstrap' => ['log'],
-    'modules' => [
-        'settings' => [
-            'class' => 'pheme\settings\Module',
-            'sourceLanguage' => 'ru'
-        ],
-    ],
+
     'components' => [
+
         'request' => [
             'csrfParam' => '_csrf-backend',
         ],
@@ -58,9 +54,8 @@ return [
             'enableStrictParsing' => true,
             'showScriptName' => false,
         ],
-        'settings' => [
-            'class' => 'pheme\settings\components\Settings'
-        ],
+
+
 
     ],
     'params' => $params,
