@@ -106,14 +106,14 @@ class User extends ActiveRecord implements IdentityInterface
         return [
             'id' => 'ID',
             'auth_key' => 'Auth Key',
-            'password_hash' => 'Password Hash',
-            'password_reset_token' => 'Password Reset Token',
+            'password_hash' => 'Хэш пароля',
+            'password_reset_token' => 'Идентификатор сброса пароля',
             'email' => 'Email',
             'firstname' => 'Имя',
             'lastname' => 'Фамилия',
-            'role' => 'Role',
+            'role' => 'Роль',
             'city_id' => 'Город',
-            'status' => 'Status',
+            'status' => 'Статус',
             'created_at' => 'Created At',
             'updated_at' => 'Updated At',
         ];

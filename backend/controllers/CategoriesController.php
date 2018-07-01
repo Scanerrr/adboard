@@ -159,7 +159,7 @@ class CategoriesController extends Controller
             return $model;
         }
 
-        throw new NotFoundHttpException('The requested page does not exist.');
+        throw new NotFoundHttpException('Страница не найдена.');
     }
 
     public static function translit($text, $lowercase = true)

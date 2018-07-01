@@ -270,12 +270,12 @@ class AdsController extends Controller
             return $model;
         }
 
-        throw new NotFoundHttpException('The requested page does not exist.');
+        throw new NotFoundHttpException('Страница не найдена.');
     }
 
     public function actionUpload()
     {
-        if (!Yii::$app->request->isAjax) throw new NotFoundHttpException('The requested page does not exist.');
+        if (!Yii::$app->request->isAjax) throw new NotFoundHttpException('Страница не найдена.');
 
         $image = UploadedFile::getInstanceByName('image');
         if ($image) {
@@ -293,7 +293,7 @@ class AdsController extends Controller
 
     public function actionUploaddelete()
     {
-        if (!Yii::$app->request->isAjax) throw new NotFoundHttpException('The requested page does not exist.');
+        if (!Yii::$app->request->isAjax) throw new NotFoundHttpException('Страница не найдена.');
 
         $success = false;
         $id = Yii::$app->request->post('id');
