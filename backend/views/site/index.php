@@ -2,7 +2,7 @@
 
 /* @var $this yii\web\View */
 
-$this->title = 'My Yii Application';
+$this->title = \Yii::$app->settings->get('Site.siteName');
 ?>
 <div class="site-index">
 
