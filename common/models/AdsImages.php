@@ -69,14 +69,15 @@ class AdsImages extends \yii\db\ActiveRecord
     }
     public function getImageUrl()
     {
-        return $this->image ? \Yii::$app->request->BaseUrl . DIRECTORY_SEPARATOR . $this->image : '';
+        $url =  isset(Yii::$app->urlManagerFrontend) ? Yii::$app->urlManagerFrontend->BaseUrl : Yii::$app->request->BaseUrl;
+        return $this->image ? $url . DIRECTORY_SEPARATOR . $this->image : '';
     }
 
     public function upload()
     {
         if ($this->validate('imageFiles')) {
             $dir = 'uploads/';
-            $subdir = Yii::$app->user->id . '/';
+            $subdir = $this->user_id . '/';
             $directory = Yii::getAlias('@root/'.$dir) . $subdir;
             if (!is_dir($directory)) {
                 try {

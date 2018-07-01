@@ -188,8 +188,8 @@ class AdsController extends Controller
 
                 // edit additional images
                 if ($images = Yii::$app->request->post('files')) {
-                    $tempDir = Yii::getAlias('@webroot/uploads/temp/'.$model->user_id .'/');
-                    $webDir = Yii::getAlias('@webroot/') . Yii::$app->urlManager->BaseUrl; // /web/
+                    $tempDir = Yii::getAlias('@root/uploads/temp/'.$user->id .'/');
+                    $webDir = Yii::getAlias('@root/'); // /web/
 
                     foreach ($images as $image) {
                         // if file not exists in upload folder and exists in temp move it to upload

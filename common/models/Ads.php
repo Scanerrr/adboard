@@ -176,7 +176,7 @@ class Ads extends ActiveRecord
     {
         if ($this->validate('imageFile')) {
             $dir = 'uploads/';
-            $subdir = Yii::$app->user->id . '/';
+            $subdir = $this->user_id . '/';
             $directory = Yii::getAlias('@root/'.$dir) . $subdir;
             if (!is_dir($directory)) {
                 try {
