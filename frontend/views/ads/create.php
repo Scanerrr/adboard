@@ -1,5 +1,7 @@
-<?php
+<?php /** @noinspection PhpUnhandledExceptionInspection */
 
+use common\models\AdsPhones;
+use common\models\Currency;
 use kartik\depdrop\DepDrop;
 use kartik\select2\Select2;
 use unclead\multipleinput\MultipleInput;
@@ -10,6 +12,8 @@ use yii\widgets\ActiveForm;
 /* @var $this yii\web\View */
 /* @var $model common\models\Ads */
 /* @var $form ActiveForm */
+/* @var $categories array */
+/* @var $cities array */
 
 $this->title = 'Подать объявление';
 ?>
@@ -23,24 +27,23 @@ $this->title = 'Подать объявление';
             <div class="col-sm-5">
                 <?= $form->field($model, 'title')->textInput(['maxlength' => true]) ?>
 
-                <?= $form->field($model, 'category_id')->widget(Select2::classname(), [
+                <?= $form->field($model, 'parent_category_id')->widget(Select2::classname(), [
                     'data' => $categories,
                     'options' => [
                         'placeholder' => 'Выбрать категорию',
                         'id' => 'parent_category_id'
                     ],
                 ]) ?>
-                <?= DepDrop::widget([
-                    'name' => 'subcategory_id',
-                    'options'=>['id'=>'category_id'],
+
+                <?= $form->field($model, 'category_id')->widget(DepDrop::classname(), [
+                    'options' => ['id' => 'category_id'],
                     'type' => DepDrop::TYPE_SELECT2,
-                    'pluginOptions'=>[
-                        'depends'=>['parent_category_id'],
-                        'placeholder'=>'Выбрать подкатегорию',
-                        'url'=>Url::to(['/ads/subcat'])
+                    'pluginOptions' => [
+                        'depends' => ['parent_category_id'],
+                        'placeholder' => 'Выбрать подкатегорию',
+                        'url' => Url::to(['/ads/subcat'])
                     ]
-                ]);
-                ?>
+                ]) ?>
 
                 <?= $form->field($model, 'city_id')->widget(Select2::className(), [
                     'data' => $cities,
@@ -50,12 +53,68 @@ $this->title = 'Подать объявление';
 
                     ],
                 ]) ?>
-                <?= $form->field($model, 'price')->textInput(['maxlength' => true]) ?>
-                <?= $form->field($userPhones, 'phone')->widget(MultipleInput::className(), [
+                <div class="row">
+                    <div class="col-sm-6">
+                        <?= $form->field($model, 'price')->textInput(['maxlength' => true]) ?>
+                    </div>
+                    <div class="col-sm-3">
+                        <?= $form->field($model, 'currency_id')
+                            ->dropDownList(Currency::find()->select('description')->indexBy('id')->column())
+                            ->label(false) ?>
+                    </div>
+                    <div class="col-sm-3">
+                        <?= $form->field($model, 'price_type')
+                            ->checkbox(['value' => 1, 'label' => 'Договорная']) ?>
+                    </div>
+                </div>
+
+                <label class="control-label">Телефон</label>
+                <div class="form-inline">
+                    <div class="phone-list">
+
+                        <div class="input-group phone-input">
+                                <span class="input-group-btn">
+                                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"
+                                            aria-expanded="false">
+                                        <span class="type-text">Выбрать тип</span>
+                                        <span class="caret"></span>
+                                    </button>
+                                    <ul class="dropdown-menu" role="menu">
+                                        <li><a class="changeType" href="javascript:;" data-type-value="1"><i
+                                                        class="fab fa-viber"></i> Viber</a></li>
+                                        <li><a class="changeType" href="javascript:;" data-type-value="2"><i
+                                                        class="fab fa-telegram"></i> Telegram</a></li>
+                                        <li><a class="changeType" href="javascript:;" data-type-value="3"><i
+                                                        class="fab fa-whatsapp"></i> Whatsapp</a></li>
+                                    </ul>
+                                </span>
+                            <?= $form->field($adsPhones, 'type[0]')
+                                ->hiddenInput(['class' => 'type-input'])->label(false) ?>
+
+                            <?= $form->field($adsPhones, 'phone[0]', [
+                                'options' => ['style' => 'display: inherit'],
+                                'template' => '{input}'
+                            ])
+                                ->textInput(['style' => 'margin-top: 5px', 'placeholder' => '380999999999', 'mask' => '380999999999'])->label(false) ?>
+                        </div>
+
+                    </div>
+
+
+                    <button type="button" class="btn btn-primary btn-sm btn-add-phone">
+                        <span class="glyphicon glyphicon-plus"></span> Добавить телефон
+                    </button>
+                    <div class="col-sm-1">
+                        <div class="phone-type-icon"></div>
+                    </div>
+
+                </div>
+
+                <? /*= $form->field($adsPhones, 'phone')->widget(MultipleInput::className(), [
                     'rendererClass' => \common\widgets\CustomMultipleRenderer::className(),
-                    'max'               => 3,
-                    'min'               => 1, // should be at least 1 rows
-                    'allowEmptyList'    => false,
+                    'max' => 3,
+                    'min' => 1, // should be at least 1 rows
+                    'allowEmptyList' => false,
                     'addButtonPosition' => MultipleInput::POS_FOOTER,
                     'addButtonOptions' => [
                         'label' => 'Добавить еще один',
@@ -69,33 +128,35 @@ $this->title = 'Подать объявление';
                         'validateOnSubmit' => true,
                         'validateOnBlur' => false,
                     ],
-                    'data' => $phones,
+                    'data' => [0 => ['phone' => '380507380495', 'phone_type' => 2]],
                     'columns' => [
                         [
-                            'name'  => 'phone',
+                            'name' => 'phone',
                             'type' => \yii\widgets\MaskedInput::className(),
                             'options' => [
                                 'class' => 'input-phone',
                                 'mask' => '380999999999',
                             ],
                         ],
+                        [
+                            'name' => 'phone_type',
+                            'type' => 'dropDownList',
+                            'options' => [
+                                'class' => 'select-phone_type',
+                            ],
+                            'defaultValue' => 1,
+                            'items' => [
+                                AdsPhones::VIBER => 'VIBER',
+                                AdsPhones::TELEGRAM => 'TELEGRAM',
+                                AdsPhones::WHATSAPP => 'WHATSAPP'
+                            ]
+                        ],
                     ],
-                ])->hint('Номер должен быть в международном формате 380XXXXXXXXX')->label('Номер телефона') ?>
+                ])->hint('Номер должен быть в международном формате 380XXXXXXXXX')->label('Номер телефона') */ ?>
 
             </div>
             <div class="col-sm-5 col-sm-offset-2">
-                <div class="row">
-                    <label class="control-label">Выбрать изображения</label>
-
-                    <!-- image 1 -->
-                    <?= $form->field($model, 'imageFile', [
-                        'labelOptions' => [ 'class' => 'custom-file-upload' ]
-                    ])->fileInput(['accept' => 'image/*','id'=>'main_image'])
-                        ->label('<i class="fa fa-plus-circle"></i>'); ?>
-                    <?= Html::button('Добавить еще изображение', ['class' => 'btn btn-block btn-default add_image']) ?>
-                </div>
-
-                <div class="row gallery-block additional_images" style="<?= !$images ? 'display: none' : '' ?>">
+                <div class="row gallery-block additional_images">
 
                     <!--  start: Images Gallery Upload Widget  -->
                     <div id="galleryPlaceArea" class="col-sm-12 form-field gallery-place">
@@ -145,9 +206,11 @@ $this->title = 'Подать объявление';
                         <!--                            <div id="photosDefault" class="photosdef" style="display: none">-->
                         <!--                                --><?php //for ($i = 0; $i <= 7; $i++): ?>
                         <!--                                    <div class="col-xs-12 col-sm-11 col-md-6">-->
-                        <!--                                        <input type="file" id="--><?//= $i ?><!--" name="filesdef[--><?//= $i ?><!--]" value=""-->
+                        <!--                                        <input type="file" id="-->
+                        <? //= $i ?><!--" name="filesdef[--><? //= $i ?><!--]" value=""-->
                         <!--                                               accept="image/jpeg,image/png,image/jpg">-->
-                        <!--                                        <button type="button" id="fileupload--><?//= $i ?><!--" class="delete"-->
+                        <!--                                        <button type="button" id="fileupload-->
+                        <? //= $i ?><!--" class="delete"-->
                         <!--                                                style="display: none;"></button>-->
                         <!--                                    </div>-->
                         <!---->
@@ -163,7 +226,7 @@ $this->title = 'Подать объявление';
         </div>
         <div class="row">
             <div class="col-sm-12">
-                <?= $form->field($model, 'description')->textarea(['rows'=>7]) ?>
+                <?= $form->field($model, 'description')->textarea(['rows' => 7]) ?>
             </div>
         </div>
 

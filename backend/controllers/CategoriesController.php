@@ -89,7 +89,7 @@ class CategoriesController extends Controller
             return $this->redirect(['index']);
         }
 
-        $categories = Categories::getCategories();
+        $categories = Categories::getCategoriesAsArray();
         return $this->render('create', [
             'model' => $model,
             'categories' => ArrayHelper::map($categories, 'id', 'name'),
@@ -125,7 +125,7 @@ class CategoriesController extends Controller
             }
             return $this->redirect(['index']);
         }
-        $categories = Categories::getCategories();
+        $categories = Categories::getCategoriesAsArray();
         return $this->render('update', [
             'model' => $model,
             'categories' => ArrayHelper::map($categories, 'id', 'name'),

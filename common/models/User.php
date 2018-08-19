@@ -26,7 +26,6 @@ use yii\web\IdentityInterface;
  * @property Ads[] $ads
  * @property City $city
  * @property Roles $role0
- * @property UserAdWatches[] $userAdWatches
  * @property UserPhones[] $userPhones
  */
 class User extends ActiveRecord implements IdentityInterface
@@ -136,6 +135,7 @@ class User extends ActiveRecord implements IdentityInterface
 
     /**
      * {@inheritdoc}
+     * @throws NotSupportedException
      */
     public static function findIdentityByAccessToken($token, $type = null)
     {
@@ -217,6 +217,7 @@ class User extends ActiveRecord implements IdentityInterface
      * Generates password hash from password and sets it to the model
      *
      * @param string $password
+     * @throws \yii\base\Exception
      */
     public function setPassword($password)
     {
@@ -225,6 +226,7 @@ class User extends ActiveRecord implements IdentityInterface
 
     /**
      * Generates "remember me" authentication key
+     * @throws \yii\base\Exception
      */
     public function generateAuthKey()
     {
@@ -233,6 +235,7 @@ class User extends ActiveRecord implements IdentityInterface
 
     /**
      * Generates new password reset token
+     * @throws \yii\base\Exception
      */
     public function generatePasswordResetToken()
     {
@@ -260,13 +263,6 @@ class User extends ActiveRecord implements IdentityInterface
         return $this->hasOne(Roles::className(), ['id' => 'role']);
     }
 
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getUserAdWatches()
-    {
-        return $this->hasMany(UserAdWatches::className(), ['user_id' => 'id']);
-    }
 
     /**
      * @return \yii\db\ActiveQuery

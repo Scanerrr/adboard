@@ -139,7 +139,7 @@ class AdsController extends Controller
             $parents = $_POST['depdrop_parents'];
             if ($parents != null) {
                 $cat_id = $parents[0];
-                $out = Categories::getCategories($cat_id);
+                $out = Categories::getCategoriesAsArray($cat_id);
 
                 // the getSubCatList function will query the database based on the
                 // cat_id and return an array like below:

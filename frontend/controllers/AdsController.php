@@ -4,8 +4,10 @@ namespace frontend\controllers;
 
 use common\models\Ads;
 use common\models\AdsImages;
+use common\models\AdsPhones;
 use common\models\Categories;
 use common\models\City;
+use common\models\form\AdsForm;
 use common\models\User;
 use common\models\UserPhones;
 use Yii;
@@ -18,6 +20,7 @@ use yii\helpers\ArrayHelper;
 use yii\helpers\FileHelper;
 use yii\helpers\Json;
 use yii\helpers\Url;
+use yii\helpers\VarDumper;
 use yii\web\NotFoundHttpException;
 use yii\web\UploadedFile;
 
@@ -111,9 +114,9 @@ class AdsController extends \yii\web\Controller
                 'pageSize' => 20,
             ],
         ]);
-        Yii::$app->session->set('category_name',$category->name);
-        Yii::$app->session->set('category_id',$category->id);
-        Yii::$app->session->set('category_slug',$category->slug);
+        Yii::$app->session->set('category_name', $category->name);
+        Yii::$app->session->set('category_id', $category->id);
+        Yii::$app->session->set('category_slug', $category->slug);
         return $this->render('category', [
             'dp' => $dp,
             'slug' => $category->name,
@@ -131,25 +134,22 @@ class AdsController extends \yii\web\Controller
     }
 
     /**
-     * Creates a new Ads model.
-     * If creation is successful, the browser will be redirected to the 'view' page.
-     * @return mixed
+     * @return string|\yii\web\Response
      */
     public function actionCreate()
     {
-        $model = new Ads();
+        $model = new AdsForm();
 
-        $cities = City::find()->select(['id', 'name_ru'])->where(['status' => '1'])->all();
-        $user = User::findIdentity(Yii::$app->user->id);
-        $phones = $user->getUserPhones()->all();
-        $categories = Categories::getCategories();
+        $cities = Yii::$app->cache->getOrSet('cities-all', function () {
+            return City::find()->select('name_ru')->where(['status' => '1'])->orderBy('name_ru')->indexBy('id')->column();
+        }, 300);
+        $user = Yii::$app->user->identity;
+        $phones = $user->userPhones;
+        $categories = Categories::getCategoriesAsArray();
         $adsImages = new AdsImages();
 
         if ($model->load(Yii::$app->request->post())) {
             $model->user_id = $user->id;
-
-            if (Yii::$app->request->post('subcategory_id'))
-                $model->category_id = Yii::$app->request->post('subcategory_id');
 
             if (isset(Yii::$app->request->post('UserPhones')['phone']))
                 $model->phone = implode(',', Yii::$app->request->post('UserPhones')['phone']);
@@ -165,7 +165,7 @@ class AdsController extends \yii\web\Controller
 
                 // edit additional images
                 if ($images = Yii::$app->request->post('files')) {
-                    $tempDir = Yii::getAlias('@webroot/uploads/temp/'.$user->id .'/');
+                    $tempDir = Yii::getAlias('@webroot/uploads/temp/' . $user->id . '/');
                     $webDir = Yii::getAlias('@webroot/') . Yii::$app->urlManager->BaseUrl; // /web/
 
                     foreach ($images as $image) {
@@ -173,7 +173,7 @@ class AdsController extends \yii\web\Controller
                         // else its an old image do nothing
                         if (!file_exists($webDir . $image)
                             && file_exists($tempDir . $image)) {
-                            $uploadDir = $webDir . 'uploads/' . $user->id .'/';
+                            $uploadDir = $webDir . 'uploads/' . $user->id . '/';
                             if (!is_dir($uploadDir)) {
                                 try {
                                     FileHelper::createDirectory($uploadDir);
@@ -187,7 +187,7 @@ class AdsController extends \yii\web\Controller
                             if (rename($tempDir . $image, $imagePath)) {
                                 $adsImage = new AdsImages();
                                 $adsImage->ad_id = $model->id;
-                                $adsImage->image = FileHelper::normalizePath('uploads/'. $user->id . '/' . $newImageName);
+                                $adsImage->image = FileHelper::normalizePath('uploads/' . $user->id . '/' . $newImageName);
                                 $adsImage->save(false);
                             }
                         }
@@ -213,29 +213,24 @@ class AdsController extends \yii\web\Controller
             'model' => $model,
             'user' => $user,
             'phones' => ArrayHelper::map($phones, 'id', 'phone'),
-            'cities' => ArrayHelper::map($cities, 'id', 'name_ru'),
+            'cities' => $cities,
             'categories' => ArrayHelper::map($categories, 'id', 'name'),
-            'userPhones' => new UserPhones(),
+            'adsPhones' => new AdsPhones(),
             'adsImages' => $adsImages
         ]);
     }
 
-    public function actionSubcat() {
+    public function actionSubcat()
+    {
         if (isset($_POST['depdrop_parents'])) {
             $parents = $_POST['depdrop_parents'];
             if ($parents != null) {
                 $cat_id = $parents[0];
 
-                // the getSubCatList function will query the database based on the
-                // cat_id and return an array like below:
-                // [
-                //    ['id'=>'<sub-cat-id-1>', 'name'=>'<sub-cat-name1>'],
-                //    ['id'=>'<sub-cat_id_2>', 'name'=>'<sub-cat-name2>']
-                // ]
-                return Json::encode(['output'=>Categories::getCategories($cat_id), 'selected'=>'']);
+                return Json::encode(['output' => Categories::getCategoriesAsArray($cat_id), 'selected' => '']);
             }
         }
-        return Json::encode(['output'=>'', 'selected'=>'']);
+        return Json::encode(['output' => '', 'selected' => '']);
     }
 
     public function actionView(int $id)
@@ -296,7 +291,7 @@ class AdsController extends \yii\web\Controller
 
                     // edit additional images
                     if ($images = Yii::$app->request->post('files')) {
-                        $tempDir = Yii::getAlias('@webroot/uploads/temp/'.$userID .'/');
+                        $tempDir = Yii::getAlias('@webroot/uploads/temp/' . $userID . '/');
                         $webDir = Yii::getAlias('@webroot/') . Yii::$app->urlManager->BaseUrl; // /web/
 
                         foreach ($images as $image) {
@@ -304,7 +299,7 @@ class AdsController extends \yii\web\Controller
                             // else its an old image do nothing
                             if (!file_exists($webDir . $image)
                                 && file_exists($tempDir . $image)) {
-                                $uploadDir = $webDir . 'uploads/' . $userID .'/';
+                                $uploadDir = $webDir . 'uploads/' . $userID . '/';
                                 if (!is_dir($uploadDir)) {
                                     try {
                                         FileHelper::createDirectory($uploadDir);
@@ -318,7 +313,7 @@ class AdsController extends \yii\web\Controller
                                 if (rename($tempDir . $image, $imagePath)) {
                                     $adsImage = new AdsImages();
                                     $adsImage->ad_id = $ad->id;
-                                    $adsImage->image = FileHelper::normalizePath('uploads/'. $userID . '/' . $newImageName);
+                                    $adsImage->image = FileHelper::normalizePath('uploads/' . $userID . '/' . $newImageName);
                                     $adsImage->save(false);
                                 }
                             }
@@ -385,7 +380,7 @@ class AdsController extends \yii\web\Controller
         Yii::$app->view->params['showCategories'] = true;
 
         //  get main cats
-        $categories = Categories::getCategories(0);
+        $categories = Categories::getCategoriesAsArray(0);
 
         return $this->render('all', [
             'dp' => $dp,
@@ -399,14 +394,14 @@ class AdsController extends \yii\web\Controller
 
         $image = UploadedFile::getInstanceByName('image');
         if ($image) {
-            $dir = Yii::getAlias('@webroot/uploads/temp/'.Yii::$app->user->id .'/');
+            $dir = Yii::getAlias('@webroot/uploads/temp/' . Yii::$app->user->id . '/');
             try {
                 FileHelper::createDirectory($dir);
             } catch (Exception $e) {
             }
-            $path = $dir.$image->baseName.'.'.$image->extension;
+            $path = $dir . $image->baseName . '.' . $image->extension;
             $image->saveAs($path);
-            return Json::encode(['error'=>0, 'name'=>$image->name, 'url' => '/uploads/temp/'.Yii::$app->user->id .'/'.$image->name]);
+            return Json::encode(['error' => 0, 'name' => $image->name, 'url' => '/uploads/temp/' . Yii::$app->user->id . '/' . $image->name]);
         }
 
     }
@@ -421,7 +416,7 @@ class AdsController extends \yii\web\Controller
         if ($id != null && $filename) {
             // if equal 0 then its temp file else its existed file
             if ($id == 0) {
-                FileHelper::unlink(Yii::getAlias('@webroot/uploads/temp/'.Yii::$app->user->id .'/') . $filename);
+                FileHelper::unlink(Yii::getAlias('@webroot/uploads/temp/' . Yii::$app->user->id . '/') . $filename);
                 $success = true;
             } else {
                 AdsImages::deleteAll(['id' => $id]);
@@ -430,7 +425,7 @@ class AdsController extends \yii\web\Controller
             }
         }
 
-        return Json::encode(['success'=>$success]);
+        return Json::encode(['success' => $success]);
 
     }
 

@@ -2,47 +2,48 @@
 
 namespace common\models;
 
+use Yii;
 
 /**
- * This is the model class for table "statuses".
+ * This is the model class for table "shipping".
  *
  * @property int $id
- * @property string $name
+ * @property string $method
  * @property string $description
  *
  * @property Ads[] $ads
  */
-class Statuses extends \yii\db\ActiveRecord
+class Shipping extends \common\models\Ads
 {
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public static function tableName()
     {
-        return 'statuses';
+        return 'shipping';
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function rules()
     {
         return [
-            [['name'], 'required'],
-            [['description'], 'string'],
-            [['name'], 'string', 'max' => 255],
-            [['name'], 'unique'],
+            [['method'], 'required'],
+            [['method'], 'string', 'max' => 24],
+            [['description'], 'string', 'max' => 255],
+            [['method'], 'unique'],
         ];
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function attributeLabels()
     {
         return [
             'id' => 'ID',
-            'name' => 'Name',
+            'method' => 'Method',
             'description' => 'Description',
         ];
     }
@@ -52,6 +53,6 @@ class Statuses extends \yii\db\ActiveRecord
      */
     public function getAds()
     {
-        return $this->hasMany(Ads::className(), ['status' => 'id']);
+        return $this->hasMany(Ads::className(), ['shipping_id' => 'id']);
     }
 }

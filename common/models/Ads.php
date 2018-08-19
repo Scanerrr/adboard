@@ -22,18 +22,31 @@ use yii\web\UploadedFile;
  * @property int $city_id
  * @property int $user_id
  * @property string $price
+ * @property int $price_type
+ * @property int $currency_id
+ * @property int $state
+ * @property string $vendor
+ * @property string $model
+ * @property int $shipping_id
+ * @property int $payment_id
  * @property string $description
- * @property string $phone
  * @property string $image
  * @property int $status
+ * @property int $count_view
+ * @property string $contact_name
+ * @property string $contact_email
  * @property int $updated_at
  * @property int $created_at
  *
- * @property User $user
- * @property Categories $category
- * @property City $city
- * @property Statuses $status0
- * @property AdsImages[] $adsImages
+ * @property Currency $currency
+ * @property Payment $payment
+ * @property Shipping $shipping
+ * @property User $user0
+ * @property Categories $category0
+ * @property City $city0
+ * @property AdsImages[] $adsImages0
+ * @property AdsPhones[] $adsPhones
+ * @property Favorite[] $favorites
  */
 class Ads extends ActiveRecord
 {
@@ -42,13 +55,15 @@ class Ads extends ActiveRecord
      */
     public $imageFile;
 
-
     /**
      * @Statuses
      */
     const STATUS_ACTIVE = 1;
     const STATUS_MODERATING = 2;
     const STATUS_DISABLED = 3;
+
+    const STATE_NEW = 1;
+    const STATE_OLD = 2;
     /**
      * @inheritdoc
      */
@@ -63,12 +78,12 @@ class Ads extends ActiveRecord
     public function rules()
     {
         return [
-            [['title', 'category_id', 'city_id', 'price'], 'required', 'message' => '{attribute} должно быть заполнено'],
+            [['title', 'category_id', 'city_id', 'price'], 'required'],
             [['category_id', 'city_id', 'user_id', 'status', 'count_view'], 'integer'],
             [['description'], 'string'],
             [['updated_at', 'created_at'], 'default', 'value' => time()],
 
-            [['price'], 'double', 'min' => 0, 'message' => '{attribute} должно быть числом'],
+            [['price'], 'number', 'min' => 0],
 
             [['title'], 'string', 'max' => 70],
             [['title'], 'string'],
@@ -81,9 +96,25 @@ class Ads extends ActiveRecord
                 'wrongExtension' => 'Поддерживаются файлы следующих разширень: *.png, *.jpg, *.jpeg'],
             ['status', 'default', 'value' => self::STATUS_MODERATING],
             ['status', 'in', 'range' => [self::STATUS_ACTIVE, self::STATUS_MODERATING, self::STATUS_DISABLED]],
+            ['state', 'in', 'range' => [self::STATE_NEW, self::STATE_OLD]],
             [['title', 'description'], 'filter', 'filter' => function($value) {
                 return strip_tags(HTMLPurifier::process($value));
-            }]
+            }],
+
+            [['title', 'category_id', 'city_id', 'user_id', 'price', 'currency_id', 'state', 'vendor', 'model', 'shipping_id', 'payment_id', 'contact_name', 'contact_email', 'updated_at', 'created_at'], 'required'],
+            [['category_id', 'city_id', 'user_id', 'price_type', 'currency_id', 'state', 'shipping_id', 'payment_id', 'status', 'count_view', 'updated_at', 'created_at'], 'integer'],
+            [['description'], 'string'],
+            [['title', 'model'], 'string', 'max' => 70],
+            [['image'], 'string', 'max' => 255],
+            [['vendor'], 'string', 'max' => 64],
+            [['contact_name', 'contact_email'], 'string', 'max' => 128],
+            [['currency_id'], 'exist', 'skipOnError' => true, 'targetClass' => Currency::className(), 'targetAttribute' => ['currency_id' => 'id']],
+            [['payment_id'], 'exist', 'skipOnError' => true, 'targetClass' => Payment::className(), 'targetAttribute' => ['payment_id' => 'id']],
+            [['shipping_id'], 'exist', 'skipOnError' => true, 'targetClass' => Shipping::className(), 'targetAttribute' => ['shipping_id' => 'id']],
+            [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['user_id' => 'id']],
+            [['category_id'], 'exist', 'skipOnError' => true, 'targetClass' => Categories::className(), 'targetAttribute' => ['category_id' => 'id']],
+            [['city_id'], 'exist', 'skipOnError' => true, 'targetClass' => City::className(), 'targetAttribute' => ['city_id' => 'id']],
+
         ];
     }
 
@@ -122,8 +153,42 @@ class Ads extends ActiveRecord
             'count_view' => 'Просмотренно',
             'updated_at' => 'Время',
             'created_at' => 'Created At',
+            'price_type' => 'Price Type',
+            'currency_id' => 'Currency ID',
+            'state' => 'State',
+            'vendor' => 'Vendor',
+            'model' => 'Model',
+            'shipping_id' => 'Shipping ID',
+            'payment_id' => 'Payment ID',
+            'contact_name' => 'Contact Name',
+            'contact_email' => 'Contact Email',
         ];
     }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getCurrency()
+    {
+        return $this->hasOne(Currency::className(), ['id' => 'currency_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getPayment()
+    {
+        return $this->hasOne(Payment::className(), ['id' => 'payment_id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getShipping()
+    {
+        return $this->hasOne(Shipping::className(), ['id' => 'shipping_id']);
+    }
+
 
     /**
      * @return \yii\db\ActiveQuery
@@ -152,17 +217,34 @@ class Ads extends ActiveRecord
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getStatus()
+    public function getAdsImages()
     {
-        return $this->hasOne(Statuses::className(), ['id' => 'status']);
+        return $this->hasMany(AdsImages::className(), ['ad_id' => 'id']);
     }
 
     /**
      * @return \yii\db\ActiveQuery
      */
-    public function getAdsImages()
+    public function getAdsPhones()
     {
-        return $this->hasMany(AdsImages::className(), ['ad_id' => 'id']);
+        return $this->hasMany(AdsPhones::className(), ['ad_id' => 'id']);
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getFavorites()
+    {
+        return $this->hasMany(Favorite::className(), ['ad_id' => 'id']);
+    }
+
+    /**
+     * {@inheritdoc}
+     * @return \common\models\query\AdsQuery the active query used by this AR class.
+     */
+    public static function find()
+    {
+        return new \common\models\query\AdsQuery(get_called_class());
     }
 
 

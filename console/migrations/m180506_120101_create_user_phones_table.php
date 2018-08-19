@@ -14,11 +14,11 @@ class m180506_120101_create_user_phones_table extends Migration
     {
         $this->createTable('{{%user_phones}}', [
             'id' => $this->primaryKey(),
-            'user_id' => $this->integer(),
-            'phone' => $this->string('15')->notNull()
+            'user_id' => $this->integer()->notNull(),
+            'phone' => $this->string(15)->notNull()
         ]);
 
-        $this->addForeignKey('fk_user_phones_key', '{{%user_phones}}', 'user_id', '{{%user}}', 'id', 'CASCADE', 'CASCADE');
+        $this->addForeignKey('fk_user_phones_key', '{{%user_phones}}', 'user_id', '{{%user}}', 'id');
 
     }
 

@@ -15,7 +15,7 @@ use yii\web\BadRequestHttpException;
 use yii\web\Controller;
 use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
-use common\models\LoginForm;
+use common\models\form\LoginForm;
 use frontend\models\PasswordResetRequestForm;
 use frontend\models\ResetPasswordForm;
 use frontend\models\SignupForm;
@@ -91,7 +91,7 @@ class SiteController extends Controller
             ->orderBy(['updated_at' => SORT_DESC])->limit(20)->all();
 
 //        get main cats
-        $categories = Categories::getCategories(0);
+        $categories = Categories::getCategoriesAsArray(0);
 
         return $this->render('index', [
             'ads' => $ads,
@@ -107,7 +107,7 @@ class SiteController extends Controller
 
             return [
                 'success' => true,
-                'categories' => Categories::getCategories((int)$id)
+                'categories' => Categories::getCategoriesAsArray((int)$id)
             ];
         }
         return ['error' => true, 'message' => 'Не верный идентификатор категории'];
@@ -118,7 +118,7 @@ class SiteController extends Controller
         if (!Yii::$app->request->isAjax || !Yii::$app->request->isPost) throw new HttpException(404 ,'Страница не найдена');
         Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
 //        get array of categories
-        $categories = Categories::getCategories();
+        $categories = Categories::getCategoriesAsArray();
         $cats = [];
         foreach ($categories as $category) {
 
@@ -126,12 +126,12 @@ class SiteController extends Controller
                 'name' => $category['name'],
                 'slug' => $category['slug'],
                 'image' => $category['image'],
-                'children' => Categories::getCategories($category['id'])
+                'children' => Categories::getCategoriesAsArray($category['id'])
             ];
         }
         return [
             'success' => true,
-            'categories' => Categories::getCategories()
+            'categories' => Categories::getCategoriesAsArray()
         ];
     }
 

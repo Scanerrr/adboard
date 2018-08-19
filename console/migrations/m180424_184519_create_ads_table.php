@@ -18,33 +18,38 @@ class m180424_184519_create_ads_table extends Migration
             'category_id' => $this->integer()->notNull(),
             'city_id' => $this->integer()->notNull(),
             'user_id' => $this->integer()->notNull(),
-            'price' => $this->string()->notNull(),
+            'price' => $this->decimal(10, 2)->notNull(),
+            'price_type' => $this->tinyInteger(1)->null(),
+            'currency_id' => $this->integer()->notNull(),
+            'state' => $this->tinyInteger(1)->notNull(),
+            'vendor' => $this->string(64)->notNull(),
+            'model' => $this->string(70)->notNull(),
+            'shipping_id' => $this->integer()->notNull(),
+            'payment_id' => $this->integer()->notNull(),
             'description' => $this->text(),
-            'phone' => $this->string()->notNull(),
             'image' => $this->string(),
             'status' => $this->integer()->notNull()->defaultValue(0),
             'count_view' => $this->integer()->notNull()->defaultValue(0),
+            'contact_name' => $this->string(128)->notNull(),
+            'contact_email' => $this->string(128)->notNull(),
             'updated_at' => $this->integer()->notNull(),
             'created_at' => $this->integer()->notNull(),
         ]);
-        $this->createTable('ads_images', [
+        $this->createTable('{{%ads_images}}', [
             'id' => $this->primaryKey(),
             'ad_id' => $this->integer()->notNull(),
             'image' => $this->string()->notNull(),
         ]);
-        $this->addForeignKey('fk_ad_image_key', '{{%ads_images}}', 'ad_id', '{{%ads}}', 'id', 'CASCADE', 'CASCADE');
+        $this->addForeignKey('fk_ad_image_key', '{{%ads_images}}', 'ad_id', '{{%ads}}', 'id', 'RESTRICT', 'CASCADE');
         $this->addForeignKey('fk_ad_user_key', '{{%ads}}', 'user_id', '{{%user}}', 'id', 'CASCADE', 'CASCADE');
 
-        $this->createTable('{{%statuses}}', [
+        $this->createTable('{{%ads_phones}}', [
             'id' => $this->primaryKey(),
-            'name' => $this->string()->notNull()->unique(),
-            'description' => $this->text(),
+            'ad_id' => $this->integer()->notNull(),
+            'phone' => $this->string()->notNull(),
+            'type' => $this->tinyInteger(1)->notNull(),
         ]);
-
-        $this->insert('{{%statuses}}', ['name' => 'Активный', 'description' => 'Объявление, видимое для остальных пользователей']);
-        $this->insert('{{%statuses}}', ['name' => 'Проверяется', 'description' => 'Объявление, в очереди на модерацию']);
-        $this->insert('{{%statuses}}', ['name' => 'Выключенный', 'description' => 'Объявление, откюченное пользователем или не прошедшое модерацию']);
-        $this->addForeignKey('fk_statuses_key', '{{%ads}}', 'status', '{{%statuses}}', 'id', 'CASCADE', 'CASCADE');
+        $this->addForeignKey('fk_ad_phone_key', '{{%ads_phones}}', 'ad_id', '{{%ads}}', 'id', 'RESTRICT', 'CASCADE');
     }
 
     /**
@@ -52,11 +57,7 @@ class m180424_184519_create_ads_table extends Migration
      */
     public function down()
     {
-        $this->dropForeignKey('fk_statuses_key', '{{%ads}}');
-        $this->dropTable('{{%statuses}}');
-
-        $this->dropForeignKey('fk_ad_user_key', '{{%ads}}');
-        $this->dropForeignKey('fk_ad_image_key','{{%ads}}');
+        $this->dropTable('{{%ads_phones}}');
         $this->dropTable('{{%ads_images}}');
         $this->dropTable('{{%ads}}');
     }

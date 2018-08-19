@@ -90,11 +90,11 @@ $(document).ready(function () {
     });
 
     // установливаем фотку в первую ячейку
-    // $('#fileUploadGallery').on('click', '.btn-set-cover', function (e) {
-    //     e.preventDefault();
-    //     $(this).closest('.photo-preview').prependTo('#fileUploadGallery #sortable');
-    //     setPreviewPhoto();
-    // });
+    $('#fileUploadGallery').on('click', '.btn-set-cover', function (e) {
+        e.preventDefault();
+        $(this).closest('.photo-preview').prependTo('#fileUploadGallery #sortable');
+        setPreviewPhoto();
+    });
 
     $('#fileUploadGallery').on('click', '.btn-delete', function (e) {
         var parent = $(this).parent();

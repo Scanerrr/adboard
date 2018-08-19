@@ -12,12 +12,11 @@ class m180424_185351_create_settings_table extends Migration
      */
     public function up()
     {
-        $this->createTable('{{%settings}}', [
-            'id' => $this->primaryKey(),
-            'code' => $this->string()->notNull(),
-            'key' => $this->string()->notNull()->unique(),
-            'value' => $this->text(),
-        ]);
+//        $this->createTable('{{%settings}}', [
+//            'id' => $this->primaryKey(),
+//            'key' => $this->string()->notNull()->unique(),
+//            'value' => $this->text(),
+//        ]);
     }
 
     /**

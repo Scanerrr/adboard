@@ -4,7 +4,7 @@
 
 /* @var $content string */
 
-use common\models\LoginForm;
+use common\models\form\LoginForm;
 use common\widgets\CustomNavBar;
 use kartik\typeahead\Typeahead;
 use yii\bootstrap\ActiveForm;

@@ -25,7 +25,7 @@ $(() => {
 
     };
 
-    $('#main_image').on('change', function(e) {
+    $('#main_image').on('change', function (e) {
         const customFileUpload = $(this).prev().prev();
         imagesPreview(this, customFileUpload);
     });
@@ -80,7 +80,7 @@ $(() => {
         $.ajax({
             url: '/site/get-subcategories',
             method: 'POST',
-            data: { id: category_id },
+            data: {id: category_id},
             dataType: 'JSON',
             success: data => {
                 if (data.error) {
@@ -95,7 +95,7 @@ $(() => {
                     const subcats = modal.find('#second-level-categories');
                     $('#modal-main-category > a').attr('href', '/ads/category/' + slug).text('Смотреть все объявления в ' + text);
                     $.each(data.categories, (i, cat) => {
-                        subcats.append('<li><a href="/ads/category/' + slug + '/' + cat.slug +'">'+ cat.name +'</a></li>')
+                        subcats.append('<li><a href="/ads/category/' + slug + '/' + cat.slug + '">' + cat.name + '</a></li>')
                     });
                     $('#modal-categories').modal();
                 }
@@ -104,7 +104,7 @@ $(() => {
     }
 
 
-    $('[data-target="#lightbox"]').on('click', function(event) {
+    $('[data-target="#lightbox"]').on('click', function (event) {
         const $img = $(this).find('img'),
             src = $img.attr('src'),
             alt = $img.attr('alt'),
@@ -114,7 +114,45 @@ $(() => {
     });
 
 
+    $(document.body).on('click', '.changeType', function () {
+        $(this).closest('.phone-input').find('.type-text').text($(this).text());
+        $(this).closest('.phone-input').find('.type-input').val($(this).data('type-value'));
+    });
 
+    $(document.body).on('click', '.btn-remove-phone', function () {
+        $(this).closest('.phone-input').remove();
+    });
+
+
+    $('.btn-add-phone').click(() => {
+
+        const index = $('.phone-input').length + 1;
+
+        if (index > 3) return false;
+
+        const phone_iput = $('.phone-list .phone-input').first().clone();
+        const name = phone_iput.find('.type-input').attr('name');
+        phone_iput.find('.type-input').attr('name', );
+        phone_iput.find('input[type=text]').val('').after('<span class="input-group-btn">'+
+            '<button style="margin-top: 5px;" class="btn btn-danger btn-remove-phone" type="button"><span class="glyphicon glyphicon-remove"></span></button>'+
+            '</span>');
+
+        $('.phone-list').append(phone_iput);
+
+    });
+
+    // TODO: icons preview
+    $('.phone-list .type-input').on('change', function () {
+        let icon = '';
+        if ($(this).val() == 1) {
+            icon = '<i class="fab fa-viber"></i> ';
+        } else if ($(this).val() == 2) {
+            icon = '<i class="fab fa-telegram"></i> ';
+        } else {
+            icon = '<i class="fab fa-whatsapp"></i> ';
+        }
+        $('.phone-type-icon').append(icon);
+    })
 
 });
 
